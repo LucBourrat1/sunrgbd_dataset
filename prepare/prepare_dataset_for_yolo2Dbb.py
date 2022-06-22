@@ -2,6 +2,35 @@ import os
 from glob import glob
 import json
 import shutil
+import argparse
+
+
+def parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--download", action="store_true")
+    args = parser.parse_args()
+    return args
+
+
+def download_and_extract(DOWNLOAD_DIR):
+    urls = []
+    urls.append("http://rgbd.cs.princeton.edu/data/SUNRGBD.zip")
+    urls.append("http://rgbd.cs.princeton.edu/data/SUNRGBDtoolbox.zip")
+    urls.append("http://rgbd.cs.princeton.edu/data/SUNRGBDMeta2DBB_v2.mat")
+    urls.append("http://rgbd.cs.princeton.edu/data/SUNRGBDMeta3DBB_v2.old.mat")
+
+    for url in urls:
+        file_name = os.path.basename(url)
+        cmd = f"wget -P {DOWNLOAD_DIR} {url}"
+        print(f"\n{cmd}\n")
+        os.system(cmd)
+        if file_name.split(".")[-1] == "zip":
+            cmd = f"unzip {DOWNLOAD_DIR}/{file_name} -d {DOWNLOAD_DIR}"
+            print(f"\n{cmd}\n")
+            os.system(cmd)
+            os.remove(f"{DOWNLOAD_DIR}/{file_name}")
+    return
+
 
 def from_xy_to_yolo(rectangle):
     x_min = int(round(min(rectangle[0]),0))
@@ -17,10 +46,25 @@ def from_xy_to_yolo(rectangle):
 
 
 def main():
+    # parse arguments
+    args = parser()
 
+    # define and create dataset paths if not exist
+    DATASET_FOLDER = "../dataset"
     IMAGES_FOLDER = "../dataset/images"
     LABELS_FOLDER = "../dataset/labels"
+    DOWNLOAD_DIR = "../sunrgbd/OFFICIAL_SUNRGBD"
     SET_OBJECTS_FOR_MAPPING = set()
+    if not os.path.exists(DATASET_FOLDER):
+        os.mkdir(DATASET_FOLDER)
+    if not os.path.exists(IMAGES_FOLDER):
+        os.mkdir(IMAGES_FOLDER)
+    if not os.path.exists(LABELS_FOLDER):
+        os.mkdir(LABELS_FOLDER)
+
+    # download the dataset raw files
+    if args.download:
+        download_and_extract(DOWNLOAD_DIR)
 
     path = "../sunrgbd/OFFICIAL_SUNRGBD/SUNRGBD"
     img_paths = glob(path+"/*/*/*/image/*") + glob(path+"/*/*/*/*/*/image/*")
