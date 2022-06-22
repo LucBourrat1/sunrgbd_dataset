@@ -1,4 +1,7 @@
 ./sunrgbd/OFFICIAL_SUNRGBD/
 sunrgbd-venv/
+venv-sunrgbd/
 dataset/
 ./prepare/*.json
+utils/__pycache__/
+.vscode/
